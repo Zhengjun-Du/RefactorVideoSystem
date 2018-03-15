@@ -14,7 +14,7 @@ namespace GoodVideoSystem.Services.Service
         public readonly string UNACTIVE = "UNACTIVE";
         public readonly string AVAILABLE = "AVAILABLE";
         public readonly string OUTOFTIMES = "OUTOFTIMES";
-        public readonly int MAX_DEVICE_COUNT = 3;
+        public readonly int MAX_DEVICE_COUNT = 5;
         public readonly int UNACTIVE_ = 0;
         public readonly int ACTIVE_ = 1;
         public readonly int USED_ = 2;
@@ -74,6 +74,34 @@ namespace GoodVideoSystem.Services.Service
             }
         }
 
+        public void updateInviteCodeInfoFromRetrive(Code inviteCode, string deviceUniqueCode)
+        {
+            deviceUniqueCode = deviceUniqueCode.Trim();
+
+            if (string.IsNullOrEmpty(deviceUniqueCode))
+                return;
+
+            //但凡请求信的视频，需要绑定邀请码的硬件信息
+            if (inviteCode.BindedDeviceCount < MAX_DEVICE_COUNT)
+            {
+                inviteCode.CodeStatus = USED_;
+
+                if (inviteCode.DeviceUniqueCode == null)
+                    inviteCode.DeviceUniqueCode += ("," + deviceUniqueCode);
+                else if (!inviteCode.DeviceUniqueCode.Contains(deviceUniqueCode))
+                    inviteCode.DeviceUniqueCode += ("," + deviceUniqueCode);
+                inviteCode.BindedDeviceCount = inviteCode.DeviceUniqueCode.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries).Count();
+                codeRepository.updateInviteCode(inviteCode);
+            }
+
+            else
+            {
+                inviteCode.DeviceUniqueCode = ("," + deviceUniqueCode);
+                inviteCode.BindedDeviceCount = 1;
+                codeRepository.updateInviteCode(inviteCode);
+            }
+        }
+
         public IEnumerable<Code> getInviteCodesContainsCode(string inviteCode, int vid, int pageIndex, int pageSize)
         {
             return codeRepository.getInviteCodes(inviteCode, vid, pageIndex, pageSize, false);
@@ -92,6 +120,16 @@ namespace GoodVideoSystem.Services.Service
         public IEnumerable<Code> getInviteCodesByStatus(int status, int vid)
         {
             return codeRepository.getInviteCodes(status, vid, true);
+        }
+
+        public IEnumerable<Code> getInviteCodesByUserId(int userid)
+        {
+            return codeRepository.getInviteCodeByUserId(userid);
+        }
+
+        public Code getInviteCodesByCodeValue(string codeValue)
+        {
+            return codeRepository.getInviteCode(codeValue);
         }
 
         public void getCounts(int vid, out int codeCount, out int codeCountNotExport, out int codeCountNotUsed, out int codeCountUsed)

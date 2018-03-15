@@ -130,9 +130,22 @@ namespace GoodVideoSystem.Services.Service
             return userRepository.getUsers(p => true, out recordCount);
         }
 
+        //根据用户获取邀请码
+        public string[] getCodeStrByUser(User user)
+        {
+            string[] codeStr = user.InviteCodes.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+            return codeStr;
+        }
+
         public IEnumerable<User> getUsersByPhone(string phone, out int recordCount)
         {
             return userRepository.getUsers(p => p.Phone.Contains(phone), out recordCount);
+        }
+
+        //根据用户名和电话号码获取用户
+         public User getUserByNameAndPhone(string name, string phone)
+        {
+            return userRepository.getUserByNameAndPhone(name, phone);
         }
 
         public User getUserById(int userid)

@@ -12,6 +12,8 @@ namespace GoodVideoSystem.Services.Service
         //根据设备信息处理用户
         void updateUserInfo(Code inviteCode, string deviceUniqueCode);
 
+        //根据用户获取邀请码
+        string[] getCodeStrByUser(User user);
 
         //用户注册
         void registeUser(User user);
@@ -34,6 +36,9 @@ namespace GoodVideoSystem.Services.Service
 
         //根据电话号码获取用户
         User getUserByPhone(string phone);
+
+        //根据用户名和电话号码获取用户
+        User getUserByNameAndPhone(string name, string phone);
 
         //根据设备标识和邀请码判断当前用户是否存在
         bool IsCurrentUserExist(string deviceUniqueCode, Code inputCode);

@@ -15,6 +15,9 @@ namespace GoodVideoSystem.Repositories.IRepository
 
         //根据电话获取用户
         User getUserByPhone(string phone);
+        
+        //根据用户名和电话找用户
+        User getUserByNameAndPhone(string name, string phone);
 
         //根据邀请码获取用户
         User getUserByInviteCode(string inviteCode);

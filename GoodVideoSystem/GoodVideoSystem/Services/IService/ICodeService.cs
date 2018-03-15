@@ -12,10 +12,13 @@ namespace GoodVideoSystem.Services.IService
         IEnumerable<Code> getInviteCodes(string deviceUniqueCode);
         string checkInviteCode(string inviteCode, out Code code);
         void updateInviteCodeInfo(Code inviteCode, string deviceUniqueCode);
+        void updateInviteCodeInfoFromRetrive(Code inviteCode, string deviceUniqueCode);
         IEnumerable<Code> getInviteCodesContainsCode(string inviteCode, int vid, int pageIndex, int pageSize);
         IEnumerable<Code> getInviteCodesByStatus(int status, int vid, int pageIndex, int pageSize);
         IEnumerable<Code> getInviteCodesByStatus(int status, int vid);
         IEnumerable<Code> getInviteCodesContainsCode(string inviteCode, int vid);
+        IEnumerable<Code> getInviteCodesByUserId(int userid);
+        Code getInviteCodesByCodeValue(string codeValue);
         void getCounts(int vid, out int codeCount, out int codeCountNotExport, out int codeCountNotUsed, out int codeCountUsed);
         Code getInviteCodeById(int id);
         void updateInviteCode(Code code);

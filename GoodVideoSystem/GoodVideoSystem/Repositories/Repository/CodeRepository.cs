@@ -36,6 +36,12 @@ namespace GoodVideoSystem.Models.Repository
             return Get(item => item.CodeID == id).FirstOrDefault();
         }
 
+        //按照userid查找
+        public IEnumerable<Code> getInviteCodeByUserId(int userid)
+        {
+            return Get(item => item.UserID == userid);
+        }
+
         //分页版本
         public IEnumerable<Code> getInviteCodes(Object tar, int vid, int pageIndex, int pageSize, bool isStatus)
         {
@@ -83,6 +89,7 @@ namespace GoodVideoSystem.Models.Repository
             codeCountNotUsed = Get(item => item.vid == vid && item.CodeStatus == 1).Count();
             codeCountUsed = Get(item => item.vid == vid && item.CodeStatus == 2).Count();
         }
+
         public void updateInviteCode(Code code)
         {
             Update(code);

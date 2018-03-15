@@ -13,6 +13,7 @@ namespace GoodVideoSystem.Repositories.IRepository
         Code getInviteCode(string inviteCode);
         void addInviteCode(Code code);
         Code getInviteCodeById(int id);
+        IEnumerable<Code> getInviteCodeByUserId(int userid);
         IEnumerable<Code> getInviteCodes(Object tar, int vid, int pageIndex, int pageSize, bool isStatus);
         IEnumerable<Code> getInviteCodes(Object tar, int vid, bool isStatus);
         void getCounts(int vid, out int codeCount, out int codeCountNotExport, out int codeCountNotUsed, out int codeCountUsed);

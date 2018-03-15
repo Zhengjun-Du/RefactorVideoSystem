@@ -137,7 +137,42 @@ namespace GoodVideoSystem.Controllers.Front
             return RedirectToAction("Error");
         }
 
+
+        //[UserAuthorise] 指纹改变，视频丢失，使用注册的姓名和手机号找回
+        public ActionResult RetrieveVideo(string username, string phone)
+        {
+            //如果用户名和手机号是空则跳转到AddUserInfo页面重新录入（客户端也有判断）
+            if (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(phone))
+                return RedirectToAction("CheckUserInfo", "User");
+
+            //Session失效处理，跳转到Index
+            string deviceUniqueCode_ = (string)Session["deviceUniqueCode"];
+            if (string.IsNullOrEmpty(deviceUniqueCode_))
+                return RedirectToAction("Index", "User");
+
+            //如果用户不存在
+            User user = userService.getUserByNameAndPhone(username, phone);
+            if (user == null)
+            {
+                TempData["message"] = "用户不存在，请检查姓名和手机号是否在正确！";
+                return RedirectToAction("CheckUserInfo", "User");
+            }
+
+            string[] codeStr = userService.getCodeStrByUser(user);
+            for (int i = 0; i < codeStr.Count(); i++)
+            {
+                Code code = codeService.getInviteCodesByCodeValue(codeStr[i].Trim());
+                codeService.updateInviteCodeInfo(code, deviceUniqueCode_);
+            }
+            return RedirectToAction("Home");
+        }
+
         public ActionResult AddUserInfo()
+        {
+            return View();
+        }
+
+        public ActionResult CheckUserInfo()
         {
             return View();
         }
@@ -146,8 +181,8 @@ namespace GoodVideoSystem.Controllers.Front
         public ActionResult RegisterUser(string username, string phone)
         {
             //如果用户名和手机号是空则跳转到AddUserInfo页面重新录入（客户端也有判断）
-            if(string.IsNullOrEmpty(username) || string.IsNullOrEmpty(phone))
-                return RedirectToAction("AddUserInfo","User");
+            if (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(phone))
+                return RedirectToAction("AddUserInfo", "User");
 
             //Session失效处理，跳转到Index
             string deviceUniqueCode_ = (string)Session["deviceUniqueCode"];
