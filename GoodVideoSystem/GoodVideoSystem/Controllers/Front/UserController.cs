@@ -13,11 +13,11 @@ namespace GoodVideoSystem.Controllers.Front
 {
     public class UserController : Controller
     {
-        private IUserService userService;
-        private ICodeService codeService;
-        private IProductService productService;
-        private IVideoService videoService;
-        private ISuggestService suggestService;
+        private IUserService userService;   //处理用户的服务
+        private ICodeService codeService;   //处理邀请码的服务
+        private IProductService productService; //处理产品的服务
+        private IVideoService videoService;     //处理视频的服务
+        private ISuggestService suggestService; //处理意见建议的服务
 
         //通过构造方法注入服务层
         public UserController(ICodeService codeService,
@@ -43,20 +43,40 @@ namespace GoodVideoSystem.Controllers.Front
             return View();
         }
 
+        //首次注册用户信息
+        public ActionResult AddUserInfo()
+        {
+            return View();
+        }
+
+        //指纹失效，通过验证注册信息找回视频
+        public ActionResult CheckUserInfo()
+        {
+            return View();
+        }
+
         /*
         * @desc 用户主页
         * @url /user/home
         * @method GET
         */
+
+        //主要功能：根据设备指纹获取邀请码，前端通过邀请码取视频
         public ActionResult Home()
         {
             string deviceUniqueCode = (string)Session["deviceUniqueCode"];
             if (string.IsNullOrEmpty(deviceUniqueCode))
                 return RedirectToAction("Index", "User");
 
-            Code[] inviteCodes = codeService.getInviteCodes(deviceUniqueCode).ToArray();
-            User user = userService.getUserByDevice(deviceUniqueCode);
-            Session["CurrentUser"] = user;
+            IEnumerable<Code> inviteCodesEnum = codeService.getInviteCodes(deviceUniqueCode);
+
+            Code[] inviteCodes = null;
+            if (inviteCodesEnum != null)
+            {
+                inviteCodes = inviteCodesEnum.ToArray();
+                User user = userService.getUserByDevice(deviceUniqueCode);
+                Session["CurrentUser"] = user;
+            }
             return View(inviteCodes);
         }
 
@@ -66,6 +86,7 @@ namespace GoodVideoSystem.Controllers.Front
         * @method POST
         */
 
+        //主要功能：用户输入邀请码获取视频
         public ActionResult GetVideo(string videoInviteCode)
         {
             //0.1.异常处理，如果没有获取到地址，则跳转到欢迎页面获取设备标识
@@ -111,6 +132,7 @@ namespace GoodVideoSystem.Controllers.Front
        * @method GET
        */
         //[UserAuthorise]
+        //主要功能：点击视频，播放视频
         public ActionResult Play(int vid = 0)
         {
             //1.视频是否存在
@@ -141,7 +163,7 @@ namespace GoodVideoSystem.Controllers.Front
         //[UserAuthorise] 指纹改变，视频丢失，使用注册的姓名和手机号找回
         public ActionResult RetrieveVideo(string username, string phone)
         {
-            //如果用户名和手机号是空则跳转到AddUserInfo页面重新录入（客户端也有判断）
+            //如果用户名和手机号是空则跳转到CheckUserInfo页面重新录入
             if (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(phone))
                 return RedirectToAction("CheckUserInfo", "User");
 
@@ -150,14 +172,16 @@ namespace GoodVideoSystem.Controllers.Front
             if (string.IsNullOrEmpty(deviceUniqueCode_))
                 return RedirectToAction("Index", "User");
 
-            //如果用户不存在
+            //通过姓名和手机号找到用户
             User user = userService.getUserByNameAndPhone(username, phone);
+            //如果用户不存在
             if (user == null)
             {
                 TempData["message"] = "用户不存在，请检查姓名和手机号是否在正确！";
                 return RedirectToAction("CheckUserInfo", "User");
             }
 
+            //找到用户绑定的邀请码，并更新邀请码的指纹
             string[] codeStr = userService.getCodeStrByUser(user);
             for (int i = 0; i < codeStr.Count(); i++)
             {
@@ -167,20 +191,11 @@ namespace GoodVideoSystem.Controllers.Front
             return RedirectToAction("Home");
         }
 
-        public ActionResult AddUserInfo()
-        {
-            return View();
-        }
-
-        public ActionResult CheckUserInfo()
-        {
-            return View();
-        }
 
         [HttpPost]
         public ActionResult RegisterUser(string username, string phone)
         {
-            //如果用户名和手机号是空则跳转到AddUserInfo页面重新录入（客户端也有判断）
+            //如果用户名和手机号是空则跳转到AddUserInfo页面重新录入
             if (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(phone))
                 return RedirectToAction("AddUserInfo", "User");
 

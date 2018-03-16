@@ -10,11 +10,11 @@ namespace GoodVideoSystem.Services.Service
 {
     public class CodeService : BaseService, ICodeService
     {
-        public readonly string INVALID = "INVALID";
-        public readonly string UNACTIVE = "UNACTIVE";
-        public readonly string AVAILABLE = "AVAILABLE";
-        public readonly string OUTOFTIMES = "OUTOFTIMES";
-        public readonly int MAX_DEVICE_COUNT = 5;
+        public readonly string INVALID = "INVALID";         //邀请码无效
+        public readonly string UNACTIVE = "UNACTIVE";       //邀请码未激活
+        public readonly string AVAILABLE = "AVAILABLE";     //邀请码激活可用
+        public readonly string OUTOFTIMES = "OUTOFTIMES";   //邀请码关联设备超过限定值
+        public readonly int MAX_DEVICE_COUNT = 5; 
         public readonly int UNACTIVE_ = 0;
         public readonly int ACTIVE_ = 1;
         public readonly int USED_ = 2;
@@ -48,7 +48,7 @@ namespace GoodVideoSystem.Services.Service
                 return INVALID;
             if (code.CodeStatus == UNACTIVE_) //邀请码未激活
                 return UNACTIVE;
-            if (code.BindedDeviceCount >= MAX_DEVICE_COUNT) //邀请码登录设备超过3次
+            if (code.BindedDeviceCount >= MAX_DEVICE_COUNT) //邀请码登录设备超过5次
                 return OUTOFTIMES;
             return AVAILABLE;
         }
@@ -60,7 +60,7 @@ namespace GoodVideoSystem.Services.Service
             if (string.IsNullOrEmpty(deviceUniqueCode))
                 return;
 
-            //但凡请求信的视频，需要绑定邀请码的硬件信息
+            //但凡请求新的视频，需要绑定浏览器指纹到邀请码
             if (inviteCode.BindedDeviceCount < MAX_DEVICE_COUNT)
             {
                 inviteCode.CodeStatus = USED_;
@@ -81,7 +81,7 @@ namespace GoodVideoSystem.Services.Service
             if (string.IsNullOrEmpty(deviceUniqueCode))
                 return;
 
-            //但凡请求信的视频，需要绑定邀请码的硬件信息
+            //如果指纹数量少于MAX_DEVICE_COUNT，则直接追加上去
             if (inviteCode.BindedDeviceCount < MAX_DEVICE_COUNT)
             {
                 inviteCode.CodeStatus = USED_;
@@ -94,6 +94,7 @@ namespace GoodVideoSystem.Services.Service
                 codeRepository.updateInviteCode(inviteCode);
             }
 
+            //如果指纹数量对于MAX_DEVICE_COUNT，则清空，再添加
             else
             {
                 inviteCode.DeviceUniqueCode = ("," + deviceUniqueCode);
