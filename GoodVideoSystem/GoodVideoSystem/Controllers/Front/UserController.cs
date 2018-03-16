@@ -161,6 +161,7 @@ namespace GoodVideoSystem.Controllers.Front
 
 
         //[UserAuthorise] 指纹改变，视频丢失，使用注册的姓名和手机号找回
+        [HttpPost]
         public ActionResult RetrieveVideo(string username, string phone)
         {
             //如果用户名和手机号是空则跳转到CheckUserInfo页面重新录入
@@ -181,12 +182,15 @@ namespace GoodVideoSystem.Controllers.Front
                 return RedirectToAction("CheckUserInfo", "User");
             }
 
+           
+
             //找到用户绑定的邀请码，并更新邀请码的指纹
             string[] codeStr = userService.getCodeStrByUser(user);
             for (int i = 0; i < codeStr.Count(); i++)
             {
                 Code code = codeService.getInviteCodesByCodeValue(codeStr[i].Trim());
-                codeService.updateInviteCodeInfo(code, deviceUniqueCode_);
+                if(code != null)
+                    codeService.updateInviteCodeInfo(code, deviceUniqueCode_);
             }
             return RedirectToAction("Home");
         }
